@@ -5,7 +5,7 @@ on:
     types:
       - closed # Se activa cuando un PR se cierra
     branches:
-      - main   # SOLO si el PR apuntaba a la rama 'main' (ajusta si tu rama principal es diferente)
+      - main   # PR en main
 
 # Permisos necesarios para que la Action pueda crear releases y tags
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   create_release:
-    # Solo ejecutar si el PR fue fusionado (no solo cerrado)
+    # Solo ejecutar si el PR fue fusionado
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest # Usar un runner estándar de Linux
 
