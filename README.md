@@ -40,7 +40,7 @@ It uses `qdbus6` to interact with KWin and includes features like automatic moni
 
 ## Installation
 
-1.  **Download:** Get the `wayland_obs_director.py` file from this repository (e.g., from the [Releases](https://github.com/MullyCap2004/obs-kde-plasma-wayland-director/releases/tag/release) page or by cloning the repo).
+1.  **Download:** Get the `wayland_obs_director.py` file from this repository (e.g., from the [Releases](https://github.com/MullyCap2004/obs-kde-plasma-wayland-director/releases) page or by cloning the repo).
 2.  **Configure OBS Python:**
     *   Open OBS Studio.
     *   Go to `Tools` -> `Scripts`.
