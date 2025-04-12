@@ -1,0 +1,59 @@
+name: Create Release on Merge
+
+on:
+  pull_request:
+    types:
+      - closed # Se activa cuando un PR se cierra
+    branches:
+      - main   # SOLO si el PR apuntaba a la rama 'main' (ajusta si tu rama principal es diferente)
+
+# Permisos necesarios para que la Action pueda crear releases y tags
+permissions:
+  contents: write # Permite escribir contenido (crear tags/releases)
+
+jobs:
+  create_release:
+    # Solo ejecutar si el PR fue fusionado (no solo cerrado)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest # Usar un runner estándar de Linux
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # Fetch all history so release notes can be generated correctly
+        with:
+          fetch-depth: 0
+
+      - name: Extract Version from Script
+        id: get_version # Damos un ID a este paso para referenciar su salida
+        run: |
+          # Busca la línea '# Version: X.Y.Z' y extrae X.Y.Z
+          # Asegúrate de que el nombre del archivo sea correcto
+          VERSION=$(grep -oP '# Version: \K[0-9.]+' wayland_obs_director.py)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Version could not be extracted from wayland_obs_director.py"
+            exit 1
+          fi
+          echo "Found version: $VERSION"
+          # Guarda la etiqueta (ej: v2.0.0) como una variable de entorno para pasos futuros
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        env:
+          # El token GITHUB_TOKEN se proporciona automáticamente por Actions
+          # Tiene los permisos definidos en el bloque 'permissions' del job
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating release for tag ${{ env.TAG_NAME }}"
+          # Comando gh para crear la release:
+          # gh release create <tag> [archivos...] [opciones]
+          # <tag>:               Usamos la variable de entorno TAG_NAME (ej: v2.0.0)
+          # [archivos...]:       El path a tu script .py para adjuntarlo como asset
+          # --generate-notes:    Genera automáticamente las notas de la release
+          #                      basándose en los commits desde la última release/tag.
+          # --title:             Opcional: Título de la release (por defecto usa el tag)
+          gh release create ${{ env.TAG_NAME }} \
+            wayland_obs_director.py \
+            --title "Release ${{ env.TAG_NAME }}" \
+            --generate-notes
+          echo "Release ${{ env.TAG_NAME }} created successfully."
